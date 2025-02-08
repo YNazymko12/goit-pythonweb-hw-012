@@ -1157,6 +1157,24 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
+name = "pytest-mock"
+version = "3.14.0"
+description = "Thin-wrapper around the mock package for easier use with pytest"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"},
+    {file = "pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f"},
+]
+
+[package.dependencies]
+pytest = ">=6.2.5"
+
+[package.extras]
+dev = ["pre-commit", "pytest-asyncio", "tox"]
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -1207,6 +1225,37 @@ files = [
 
 [package.extras]
 dev = ["atomicwrites (==1.2.1)", "attrs (==19.2.0)", "coverage (==6.5.0)", "hatch", "invoke (==1.7.3)", "more-itertools (==4.3.0)", "pbr (==4.3.0)", "pluggy (==1.0.0)", "py (==1.11.0)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-timeout (==2.1.0)", "pyyaml (==5.1)"]
+
+[[package]]
+name = "redis"
+version = "5.2.1"
+description = "Python client for Redis database and key-value store"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "redis-5.2.1-py3-none-any.whl", hash = "sha256:ee7e1056b9aea0f04c6c2ed59452947f34c4940ee025f5dd83e6a6418b6989e4"},
+    {file = "redis-5.2.1.tar.gz", hash = "sha256:16f2e22dff21d5125e8481515e386711a34cbec50f0e44413dd7d9c060a54e0f"},
+]
+
+[package.extras]
+hiredis = ["hiredis (>=3.0.0)"]
+ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==23.2.1)", "requests (>=2.31.0)"]
+
+[[package]]
+name = "redis-lru"
+version = "0.1.2"
+description = "LRU cache for Python. Use Redis as backend. Provides a dictionary-like object as well as a method decorator."
+optional = false
+python-versions = ">=3.4"
+groups = ["main"]
+files = [
+    {file = "redis-lru-0.1.2.tar.gz", hash = "sha256:01a648cb42d8efdb9472c5c42980da3dad4be4b6d45f2d9811ff6f69bcbfb164"},
+    {file = "redis_lru-0.1.2-py2.py3-none-any.whl", hash = "sha256:e6c2f56b43900b5a8f741d1db44bdcf423f228d6f3665f48a9ec6321c5579d0a"},
+]
+
+[package.dependencies]
+redis = "*"
 
 [[package]]
 name = "rsa"
@@ -1524,4 +1573,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "537718d6d22956f50911685d3a2e85b6573cdc38d2ef357e581fc1f14217f055"
+content-hash = "cb804880f6a2baa6b185a7995ccc61411b92ed3c7862c7f39e96b68bb9fa38b3"

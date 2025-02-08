@@ -1,4 +1,5 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock
+from tests.conftest import TestingSessionLocal
 
 import pytest
 from sqlalchemy import select
@@ -73,3 +74,21 @@ def test_validation_error_login(client):
     data = response.json()
     assert "detail" in data
 
+@pytest.mark.asyncio
+async def test_confirmed_email(client, mocker):
+    token = "valid_token"
+    email = user_data["email"]
+
+    mocker.patch("src.api.auth.get_email_from_token", AsyncMock(return_value=email))
+
+    async with TestingSessionLocal() as session:
+        current_user = await session.execute(select(User).where(User.email == email))
+        current_user = current_user.scalar_one_or_none()
+        if current_user:
+            current_user.confirmed = False
+            await session.commit()
+
+    response = client.get(f"/api/auth/confirmed_email/{token}")
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Електронну пошту підтверджено"}
