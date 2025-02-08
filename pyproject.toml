@@ -27,6 +27,7 @@ fastapi-mail = "^1.2.0"
 python-multipart = "^0.0.6"
 libgravatar = "^1.0.4"
 bcrypt = "3.2.2"
+pytest = "^8.3.4"
 
 [build-system]
 requires = ["poetry-core"]
