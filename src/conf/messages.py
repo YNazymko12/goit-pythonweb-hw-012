@@ -6,3 +6,7 @@ DATABASE_ERROR_CONNECT_MESSAGE = "Error connecting to the database"
 DATABASE_SESSION_NOT_INITIALIZED = "Database session is not initialized"
 INVALID_BIRTHDAY = "Birthday cannot be in the future"
 INVALID_PHONE_NUMBER = "Phone number must contain only digits"
+
+API_ERROR_USER_ALREADY_EXIST = "Користувач з таким іменем вже існує"
+API_ERROR_USER_NOT_AUTHORIZED = "Електронна адреса не підтверджена"
+API_ERROR_LOGIN_OR_PASSWORD = "Неправильний логін або пароль"

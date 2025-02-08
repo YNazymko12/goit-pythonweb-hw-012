@@ -28,7 +28,18 @@ python-multipart = "^0.0.6"
 libgravatar = "^1.0.4"
 bcrypt = "3.2.2"
 pytest = "^8.3.4"
+pytest-asyncio = "^0.25.3"
+aiosqlite = "^0.21.0"
+pytest-cov = "^6.0.0"
+
+[tool.poetry.group.dev.dependencies]
+httpx = "^0.28.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+filterwarnings = "ignore::DeprecationWarning"
+asyncio_default_fixture_loop_scope = "function"

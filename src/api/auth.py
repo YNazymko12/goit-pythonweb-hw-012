@@ -6,6 +6,7 @@ from src.services.auth import create_access_token, get_email_from_token, Hash
 from src.services.users import UserService
 from src.services.email import send_email
 from src.database.db import get_db
+from src.conf.messages import API_ERROR_USER_ALREADY_EXIST, API_ERROR_USER_NOT_AUTHORIZED, API_ERROR_LOGIN_OR_PASSWORD
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -23,7 +24,7 @@ async def register_user(
     if email_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Користувач з таким email вже існує",
+            detail=API_ERROR_USER_ALREADY_EXIST,
         )
 
     username_user = await user_service.get_user_by_username(user_data.username)
@@ -49,13 +50,13 @@ async def login_user(
     if not user or not Hash().verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неправильний логін або пароль",
+            detail=API_ERROR_LOGIN_OR_PASSWORD,
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.confirmed:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Електронна адреса не підтверджена",
+            detail=API_ERROR_USER_NOT_AUTHORIZED,
         )
     access_token = await create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
