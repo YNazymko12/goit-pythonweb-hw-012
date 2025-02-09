@@ -1,3 +1,14 @@
+"""Authentication service module.
+
+This module provides authentication-related functionality including:
+- Password hashing and verification
+- JWT token generation and validation
+- User authentication middleware
+- Email verification token handling
+
+It uses bcrypt for password hashing and JWT for token generation.
+"""
+
 from datetime import datetime, timedelta, UTC
 from typing import Optional
 
@@ -10,20 +21,54 @@ from jose import JWTError, jwt
 from src.database.db import get_db
 from src.conf.config import settings
 from src.services.users import UserService
+from src.database.models import User
+
 
 class Hash:
+    """Password hashing utility class using bcrypt.
+
+    This class provides methods for hashing passwords and verifying
+    password hashes using the bcrypt algorithm.
+    """
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def verify_password(self, plain_password, hashed_password):
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """Verify a password against its hash.
+
+        Args:
+            plain_password (str): The plain-text password to verify.
+            hashed_password (str): The hashed password to compare against.
+
+        Returns:
+            bool: True if the password matches the hash, False otherwise.
+        """
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    def get_password_hash(self, password: str):
+    def get_password_hash(self, password: str) -> str:
+        """Generate a bcrypt hash of a password.
+
+        Args:
+            password (str): The plain-text password to hash.
+
+        Returns:
+            str: The bcrypt hash of the password.
+        """
         return self.pwd_context.hash(password)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# define a function to generate a new access token
-async def create_access_token(data: dict, expires_delta: Optional[int] = None):
+async def create_access_token(data: dict, expires_delta: Optional[int] = None) -> str:
+    """Create a new JWT access token.
+
+    Args:
+        data (dict): The data to encode in the token, typically contains 'sub' key
+            with the username.
+        expires_delta (Optional[int], optional): Token expiration time in seconds.
+            If None, uses the default from settings. Defaults to None.
+
+    Returns:
+        str: The encoded JWT token.
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
@@ -37,7 +82,21 @@ async def create_access_token(data: dict, expires_delta: Optional[int] = None):
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
-):
+) -> User:
+    """FastAPI dependency for getting the current authenticated user.
+
+    Validates the JWT token and retrieves the corresponding user.
+
+    Args:
+        token (str): JWT token from the Authorization header.
+        db (Session): Database session.
+
+    Returns:
+        User: The authenticated user.
+
+    Raises:
+        HTTPException: If the token is invalid or the user is not found (401).
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -60,14 +119,36 @@ async def get_current_user(
         raise credentials_exception
     return user
 
-def create_email_token(data: dict):
+def create_email_token(data: dict) -> str:
+    """Create a JWT token for email verification.
+
+    Creates a token that expires in 7 days, used for email verification links.
+
+    Args:
+        data (dict): The data to encode in the token, typically contains 'sub' key
+            with the email address.
+
+    Returns:
+        str: The encoded JWT token.
+    """
     to_encode = data.copy()
     expire = datetime.now(UTC) + timedelta(days=7)
     to_encode.update({"iat": datetime.now(UTC), "exp": expire})
     token = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
     return token
 
-async def get_email_from_token(token: str):
+async def get_email_from_token(token: str) -> str:
+    """Extract the email address from an email verification token.
+
+    Args:
+        token (str): The JWT token to decode.
+
+    Returns:
+        str: The email address from the token.
+
+    Raises:
+        HTTPException: If the token is invalid or expired (422).
+    """
     try:
         payload = jwt.decode(
             token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]

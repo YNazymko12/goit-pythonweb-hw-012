@@ -1,3 +1,25 @@
+"""FastAPI Application Entry Point.
+
+This module serves as the main entry point for the FastAPI application. It sets up the
+application with necessary middleware and routers, and defines the base application
+configuration.
+
+Features:
+    - CORS Middleware configuration for handling Cross-Origin Resource Sharing
+    - Rate limiting implementation using slowapi
+    - API routers for different endpoints:
+        - /api/utils - Utility endpoints
+        - /api/contacts - Contact management endpoints
+        - /api/auth - Authentication endpoints
+        - /api/users - User management endpoints
+
+Configuration:
+    - CORS is enabled for localhost:8000
+    - Rate limiting is implemented to prevent abuse
+    - Multiple workers (4) for better performance
+    - Debug mode enabled with auto-reload
+"""
+
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
