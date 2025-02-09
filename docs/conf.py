@@ -253,26 +253,9 @@ class MockPydanticInternalModule:
         self._config = MockPydanticInternalConfigModule()
         self._signature = MockPydanticInternalSignatureModule()
 
-class AliasChoices:
-    def __init__(self, *choices):
-        self.choices = choices
-
-    def __repr__(self):
-        return f'AliasChoices({", ".join(repr(c) for c in self.choices)})'
-
-class AliasPath:
-    def __init__(self, *path):
-        self.path = path
-
-    def __repr__(self):
-        return f'AliasPath({", ".join(repr(p) for p in self.path)})'
-
 # Create mock modules
 mock_pydantic = MockPydanticModule()
 mock_pydantic._internal = MockPydanticInternalModule()
-mock_pydantic.AliasChoices = AliasChoices
-mock_pydantic.AliasPath = AliasPath
-mock_pydantic.AliasPath = AliasPath
 
 class MockPydanticInternalUtilsModule:
     def __init__(self):
@@ -300,10 +283,6 @@ class MockPydanticInternalUtilsModule:
                     updated_mapping[k] = v
         return updated_mapping
 
-    def is_model_class(self, cls: type) -> bool:
-        from pydantic import BaseModel
-        return isinstance(cls, type) and issubclass(cls, BaseModel)
-
 sys.modules['pydantic'] = mock_pydantic
 sys.modules['pydantic._internal'] = mock_pydantic._internal
 sys.modules['pydantic._internal._config'] = mock_pydantic._internal._config
@@ -311,75 +290,9 @@ sys.modules['pydantic._internal._signature'] = mock_pydantic._internal._signatur
 sys.modules['pydantic._internal._utils'] = MockPydanticInternalUtilsModule()
 
 # Mock additional Pydantic modules
-class BaseModel:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def dict(self):
-        return {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
-
-    def json(self):
-        import json
-        return json.dumps(self.dict())
-
-    @classmethod
-    def parse_obj(cls, obj):
-        return cls(**obj)
-
-    @classmethod
-    def parse_raw(cls, raw):
-        import json
-        return cls.parse_obj(json.loads(raw))
-
-class AliasChoices:
-    def __init__(self, *choices):
-        self.choices = choices
-
-    def __repr__(self):
-        return f'AliasChoices({", ".join(repr(c) for c in self.choices)})'
-
-class Json:
-    def __init__(self):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return str
-
 sys.modules['pydantic.config'] = type('MockPydanticConfig', (), {})
-sys.modules['pydantic.fields'] = type('MockPydanticFields', (), {'AliasChoices': AliasChoices, 'Json': Json})
-sys.modules['pydantic.main'] = type('MockPydanticMain', (), {'BaseModel': BaseModel})
-
-# Mock starlette.responses
-class JSONResponse:
-    def __init__(self, *args, **kwargs):
-        pass
-
-sys.modules['starlette.responses'] = type('MockStarletteResponses', (), {'JSONResponse': JSONResponse})
-
-# Mock Pydantic dataclasses
-class MockDataclassType:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, cls):
-        return cls
-
-class MockDataclassProxy:
-    def __init__(self, cls):
-        self._cls = cls
-
-    def __call__(self, *args, **kwargs):
-        return self._cls(*args, **kwargs)
-
-def is_pydantic_dataclass(cls) -> bool:
-    return hasattr(cls, '__pydantic_model__')
-
-sys.modules['pydantic.dataclasses'] = type('MockPydanticDataclasses', (), {
-    'dataclass': MockDataclassType(),
-    'create_model_from_dataclass': lambda cls, **kwargs: MockDataclassProxy(cls),
-    'is_pydantic_dataclass': is_pydantic_dataclass,
-})
+sys.modules['pydantic.fields'] = type('MockPydanticFields', (), {})
+sys.modules['pydantic.main'] = type('MockPydanticMain', (), {})
 
 # Mock FastAPI middleware
 class MockMiddleware:

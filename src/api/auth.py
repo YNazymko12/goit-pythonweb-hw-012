@@ -92,7 +92,10 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=API_ERROR_USER_NOT_AUTHORIZED,
         )
-    access_token = await create_access_token(data={"sub": user.username})
+    # Store user ID in token and cache the user
+    from src.services.redis_service import redis_service
+    access_token = await create_access_token(data={"sub": str(user.id)})
+    redis_service.cache_user(user)
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/request_email")

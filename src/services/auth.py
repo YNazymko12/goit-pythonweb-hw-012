@@ -86,6 +86,8 @@ async def get_current_user(
     """FastAPI dependency for getting the current authenticated user.
 
     Validates the JWT token and retrieves the corresponding user.
+    First tries to get the user from Redis cache, if not found,
+    retrieves from database and caches the result.
 
     Args:
         token (str): JWT token from the Authorization header.
@@ -97,6 +99,8 @@ async def get_current_user(
     Raises:
         HTTPException: If the token is invalid or the user is not found (401).
     """
+    from src.services.redis_service import redis_service
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -108,13 +112,27 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
         )
-        username = payload["sub"]
-        if username is None:
+        if payload.get("scope") == "email_verification":
             raise credentials_exception
-    except JWTError as e:
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
         raise credentials_exception
+
+    # Try to get user from cache first
+    user = redis_service.get_user_from_cache(int(user_id))
+    if user is not None:
+        return user
+
+    # If not in cache, get from database and cache it
     user_service = UserService(db)
-    user = await user_service.get_user_by_username(username)
+    user = await user_service.get_user_by_id(int(user_id))
+    if user is None:
+        raise credentials_exception
+
+    # Cache the user for future requests
+    redis_service.cache_user(user)
     if user is None:
         raise credentials_exception
     return user

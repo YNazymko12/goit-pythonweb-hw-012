@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_SECONDS: int = 3600
+    
+    # Redis settings
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_USER_CACHE_TTL: int = 1800  # 30 minutes cache expiration
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
     MAIL_FROM: str
